@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JOB 27294 – Lots 46-51 Oran Park | AURAE 3D</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+  canvas { display: block; }
+
+  #ui {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 14px 18px; pointer-events: none; z-index: 10;
+  }
+  #title-box {
+    background: rgba(10,10,30,0.82); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 10px 16px; pointer-events: auto;
+  }
+  #title-box h1 { color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .5px; }
+  #title-box p  { color: #aaa; font-size: 11px; margin-top: 2px; }
+
+  #legend {
+    background: rgba(10,10,30,0.82); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 10px 14px; pointer-events: auto; min-width: 210px;
+  }
+  #legend h2 { color: #ccc; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+                text-transform: uppercase; margin-bottom: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; cursor: pointer; }
+  .legend-item:hover .legend-label { color: #fff; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .legend-label { color: #bbb; font-size: 11px; }
+  .legend-count { color: #666; font-size: 10px; margin-left: auto; }
+
+  #controls-hint {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    background: rgba(10,10,30,0.75); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px; padding: 6px 14px; color: #888; font-size: 11px; letter-spacing: .3px;
+    pointer-events: none;
+  }
+
+  #lot-labels { position: fixed; bottom: 50px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 0; pointer-events: none; }
+
+  #tooltip {
+    position: fixed; display: none; background: rgba(5,5,20,0.92);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+    padding: 8px 12px; color: #fff; font-size: 12px; pointer-events: none; z-index: 20;
+    max-width: 240px;
+  }
+  #tooltip .tt-title { font-weight: 700; margin-bottom: 3px; color: #7eb5d6; }
+  #tooltip .tt-line  { color: #aaa; font-size: 11px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div id="ui">
+  <div id="title-box">
+    <h1>JOB 27294 &nbsp;|&nbsp; LOTS 46–51 ORAN PARK NSW</h1>
+    <p>AURAE Aluminium Facade System &nbsp;·&nbsp; Drawn: 29/09/2025 &nbsp;·&nbsp; 3D Ref Model</p>
+  </div>
+  <div id="legend">
+    <h2>Product Legend</h2>
+    <div class="legend-item" data-type="balustrade">
+      <div class="swatch" style="background:#7eb5d6"></div>
+      <span class="legend-label">Balustrades (B1–B5)</span>
+      <span class="legend-count">50×15 AL fins</span>
+    </div>
+    <div class="legend-item" data-type="lp">
+      <div class="swatch" style="background:#5dade2"></div>
+      <span class="legend-label">Louvre Panels (LP1A–C)</span>
+      <span class="legend-count">Solaris 100-S</span>
+    </div>
+    <div class="legend-item" data-type="screen">
+      <div class="swatch" style="background:#a569bd"></div>
+      <span class="legend-label">Privacy Screens (SC1–3)</span>
+      <span class="legend-count">Solaris 150-S</span>
+    </div>
+    <div class="legend-item" data-type="sunshade">
+      <div class="swatch" style="background:#e67e22"></div>
+      <span class="legend-label">Sun Shades (EB1–3)</span>
+      <span class="legend-count">300×50 Clip Louvre</span>
+    </div>
+    <div class="legend-item" data-type="pergola">
+      <div class="swatch" style="background:#27ae60"></div>
+      <span class="legend-label">Pergolas (P1–P4)</span>
+      <span class="legend-count">Solaris 150-S Fixed</span>
+    </div>
+    <div class="legend-item" data-type="building">
+      <div class="swatch" style="background:#c8b89a"></div>
+      <span class="legend-label">Building (by others)</span>
+      <span class="legend-count">Lots 46–51</span>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip">
+  <div class="tt-title" id="tt-title"></div>
+  <div class="tt-line" id="tt-line"></div>
+</div>
+
+<div id="controls-hint">Left drag: Orbit &nbsp;|&nbsp; Right drag: Pan &nbsp;|&nbsp; Scroll: Zoom &nbsp;|&nbsp; Hover: Info</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── OrbitControls (inlined, r128 compatible) ─────────────────────────────
+(function(){
+  THREE.OrbitControls = function(object, domElement){
+    this.object = object;
+    this.domElement = domElement || document;
+    this.enabled = true;
+    this.target = new THREE.Vector3();
+    this.minDistance = 1; this.maxDistance = Infinity;
+    this.minPolarAngle = 0; this.maxPolarAngle = Math.PI;
+    this.enableDamping = true; this.dampingFactor = 0.08;
+    this.enableZoom = true; this.zoomSpeed = 1.2;
+    this.enableRotate = true; this.rotateSpeed = 0.8;
+    this.enablePan = true; this.panSpeed = 0.8;
+    var scope = this;
+    var STATE = {NONE:-1,ROTATE:0,DOLLY:1,PAN:2};
+    var state = STATE.NONE;
+    var spherical = new THREE.Spherical();
+    var sphericalDelta = new THREE.Spherical();
+    var scale = 1;
+    var panOffset = new THREE.Vector3();
+    var rotateStart = new THREE.Vector2(), rotateEnd = new THREE.Vector2(), rotateDelta = new THREE.Vector2();
+    var panStart = new THREE.Vector2(), panEnd = new THREE.Vector2(), panDelta = new THREE.Vector2();
+    var dollyStart = new THREE.Vector2(), dollyEnd = new THREE.Vector2(), dollyDelta = new THREE.Vector2();
+    this.update = function(){
+      var offset = new THREE.Vector3();
+      var quat = new THREE.Quaternion().setFromUnitVectors(object.up, new THREE.Vector3(0,1,0));
+      var quatInverse = quat.clone().invert();
+      var lastPosition = new THREE.Vector3();
+      var lastQuaternion = new THREE.Quaternion();
+      return function(){
+        var position = scope.object.position;
+        offset.copy(position).sub(scope.target);
+        offset.applyQuaternion(quat);
+        spherical.setFromVector3(offset);
+        spherical.theta += sphericalDelta.theta;
+        spherical.phi += sphericalDelta.phi;
+        spherical.phi = Math.max(scope.minPolarAngle, Math.min(scope.maxPolarAngle, spherical.phi));
+        spherical.makeSafe();
+        spherical.radius *= scale;
+        spherical.radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, spherical.radius));
+        scope.target.addScaledVector(panOffset, 1);
+        offset.setFromSpherical(spherical);
+        offset.applyQuaternion(quatInverse);
+        position.copy(scope.target).add(offset);
+        scope.object.lookAt(scope.target);
+        if(scope.enableDamping){
+          sphericalDelta.theta *= (1-scope.dampingFactor);
+          sphericalDelta.phi *= (1-scope.dampingFactor);
+          panOffset.multiplyScalar(1-scope.dampingFactor);
+        } else {
+          sphericalDelta.set(0,0,0);
+          panOffset.set(0,0,0);
+        }
+        scale = 1;
+      };
+    }();
+    function rotateLeft(a){ sphericalDelta.theta -= a; }
+    function rotateUp(a){ sphericalDelta.phi -= a; }
+    function dollyIn(s){ scale /= s; }
+    function dollyOut(s){ scale *= s; }
+    var v = new THREE.Vector3();
+    function panLeft(d, m){ v.setFromMatrixColumn(m,0); v.multiplyScalar(-d); panOffset.add(v); }
+    function panUp(d, m){
+      if(true){ v.setFromMatrixColumn(m,1); } else { v.crossVectors(scope.object.up, v.setFromMatrixColumn(m,0)); }
+      v.multiplyScalar(d); panOffset.add(v);
+    }
+    function pan(dx, dy){
+      var el = scope.domElement;
+      var h = el.clientHeight || window.innerHeight;
+      panLeft(2*dx*scope.object.position.distanceTo(scope.target)/h, scope.object.matrix);
+      panUp(2*dy*scope.object.position.distanceTo(scope.target)/h, scope.object.matrix);
+    }
+    domElement.addEventListener('contextmenu', function(e){e.preventDefault();});
+    domElement.addEventListener('mousedown', function(e){
+      if(!scope.enabled) return;
+      if(e.button===0){ state=STATE.ROTATE; rotateStart.set(e.clientX,e.clientY); }
+      else if(e.button===2){ state=STATE.PAN; panStart.set(e.clientX,e.clientY); }
+    });
+    domElement.addEventListener('mousemove', function(e){
+      if(!scope.enabled) return;
+      if(state===STATE.ROTATE){
+        rotateEnd.set(e.clientX,e.clientY);
+        rotateDelta.subVectors(rotateEnd,rotateStart).multiplyScalar(scope.rotateSpeed);
+        var el = scope.domElement;
+        rotateLeft(2*Math.PI*rotateDelta.x/(el.clientHeight||window.innerHeight));
+        rotateUp(2*Math.PI*rotateDelta.y/(el.clientHeight||window.innerHeight));
+        rotateStart.copy(rotateEnd);
+        scope.update();
+      } else if(state===STATE.PAN){
+        panEnd.set(e.clientX,e.clientY);
+        panDelta.subVectors(panEnd,panStart).multiplyScalar(scope.panSpeed);
+        pan(panDelta.x,panDelta.y);
+        panStart.copy(panEnd);
+        scope.update();
+      }
+    });
+    domElement.addEventListener('mouseup', function(){ state=STATE.NONE; });
+    domElement.addEventListener('wheel', function(e){
+      if(!scope.enabled) return;
+      if(e.deltaY<0) dollyOut(Math.pow(0.95,scope.zoomSpeed));
+      else dollyIn(Math.pow(0.95,scope.zoomSpeed));
+      scope.update();
+    },{passive:true});
+    // Touch
+    domElement.addEventListener('touchstart', function(e){
+      if(e.touches.length===1){ state=STATE.ROTATE; rotateStart.set(e.touches[0].pageX,e.touches[0].pageY); }
+      else if(e.touches.length===2){ state=STATE.DOLLY; var dx=e.touches[0].pageX-e.touches[1].pageX, dy=e.touches[0].pageY-e.touches[1].pageY; dollyStart.set(0,Math.sqrt(dx*dx+dy*dy)); }
+    },{passive:true});
+    domElement.addEventListener('touchmove', function(e){
+      if(e.touches.length===1&&state===STATE.ROTATE){
+        rotateEnd.set(e.touches[0].pageX,e.touches[0].pageY);
+        rotateDelta.subVectors(rotateEnd,rotateStart).multiplyScalar(scope.rotateSpeed*0.5);
+        var h=scope.domElement.clientHeight||window.innerHeight;
+        rotateLeft(2*Math.PI*rotateDelta.x/h); rotateUp(2*Math.PI*rotateDelta.y/h);
+        rotateStart.copy(rotateEnd); scope.update();
+      } else if(e.touches.length===2&&state===STATE.DOLLY){
+        var dx=e.touches[0].pageX-e.touches[1].pageX, dy=e.touches[0].pageY-e.touches[1].pageY;
+        dollyEnd.set(0,Math.sqrt(dx*dx+dy*dy));
+        dollyDelta.subVectors(dollyEnd,dollyStart);
+        if(dollyDelta.y>0) dollyOut(Math.pow(0.95,scope.zoomSpeed));
+        else if(dollyDelta.y<0) dollyIn(Math.pow(0.95,scope.zoomSpeed));
+        dollyStart.copy(dollyEnd); scope.update();
+      }
+    },{passive:true});
+    domElement.addEventListener('touchend', function(){ state=STATE.NONE; },{passive:true});
+    this.dispose = function(){};
+  };
+})();
+
+// ─── Scene Setup ─────────────────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+scene.fog = new THREE.Fog(0x1a1a2e, 60, 130);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(17.5, 9, 26);
+camera.lookAt(17.5, 5, 0);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(17.5, 5, 0);
+controls.minDistance = 5;
+controls.maxDistance = 100;
+controls.maxPolarAngle = Math.PI * 0.88;
+controls.update();
+
+// ─── Lighting ────────────────────────────────────────────────────────────────
+const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+scene.add(ambient);
+
+const sun = new THREE.DirectionalLight(0xfff5e0, 1.4);
+sun.position.set(20, 30, 25);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 120;
+sun.shadow.camera.left = -40; sun.shadow.camera.right = 40;
+sun.shadow.camera.top = 30; sun.shadow.camera.bottom = -10;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xb0c8ff, 0.4);
+fill.position.set(-10, 10, -10);
+scene.add(fill);
+
+// ─── Materials ───────────────────────────────────────────────────────────────
+const M = {
+  brick:     new THREE.MeshStandardMaterial({ color: 0xc8b89a, roughness: 0.85, metalness: 0.0 }),
+  brickDark: new THREE.MeshStandardMaterial({ color: 0xb0a088, roughness: 0.85, metalness: 0.0 }),
+  concrete:  new THREE.MeshStandardMaterial({ color: 0x9a9a9a, roughness: 0.7,  metalness: 0.05 }),
+  alum:      new THREE.MeshStandardMaterial({ color: 0x7c9ab5, roughness: 0.25, metalness: 0.7 }),
+  alumDark:  new THREE.MeshStandardMaterial({ color: 0x3a4a5a, roughness: 0.3,  metalness: 0.6 }),
+  lp:        new THREE.MeshStandardMaterial({ color: 0x4a88b5, roughness: 0.2,  metalness: 0.75 }),
+  screen:    new THREE.MeshStandardMaterial({ color: 0x8a5ab0, roughness: 0.25, metalness: 0.65 }),
+  sunshade:  new THREE.MeshStandardMaterial({ color: 0xc04a10, roughness: 0.3,  metalness: 0.6 }),
+  pergola:   new THREE.MeshStandardMaterial({ color: 0x2a7a4a, roughness: 0.3,  metalness: 0.6 }),
+  glass:     new THREE.MeshStandardMaterial({ color: 0x88bbcc, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.35 }),
+  ground:    new THREE.MeshStandardMaterial({ color: 0x2c2c2c, roughness: 0.95, metalness: 0.0 }),
+  roofing:   new THREE.MeshStandardMaterial({ color: 0x505050, roughness: 0.7,  metalness: 0.15 }),
+};
+
+// ─── Helper: make box mesh ───────────────────────────────────────────────────
+function box(w, h, d, mat, rx, ry, rz) {
+  const g = new THREE.BoxGeometry(w, h, d);
+  const m = new THREE.Mesh(g, mat);
+  if (rx) m.rotation.x = rx;
+  if (ry) m.rotation.y = ry;
+  if (rz) m.rotation.z = rz;
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+// ─── Raycaster for hover ─────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const hoverables = []; // [{mesh, title, info}]
+
+function addHoverable(mesh, title, info) {
+  hoverables.push({ mesh, title, info });
+}
+
+// ─── BUILDING DATA ────────────────────────────────────────────────────────────
+// Dimensions (meters). Lots ordered left→right: 51,50,49,48,47,46
+// Front of building faces +Z direction.
+
+const LOT_W   = 5.8;   // width per lot
+const BUILD_D = 9.5;   // building depth (front to back)
+const FLR_H   = 3.1;   // floor-to-floor height
+const BAL_D   = 2.73;  // balcony depth (from P2)
+const BAL_SLB = 0.2;   // balcony slab thickness
+const WALL_T  = 0.3;   // wall thickness
+const TOTAL_W = LOT_W * 6; // 34.8m
+
+// Lot x-starts: lot51=0, lot50=LOT_W, ... lot46=5*LOT_W
+function lotX(lotIndex) { return lotIndex * LOT_W; } // 0=lot51, 5=lot46
+
+// ─── GROUND ──────────────────────────────────────────────────────────────────
+{
+  const g = box(80, 0.15, 60, M.ground);
+  g.position.set(TOTAL_W/2, -0.075, -10);
+  scene.add(g);
+}
+
+// ─── BUILD EACH LOT ──────────────────────────────────────────────────────────
+const lotNames = ['LOT 51','LOT 50','LOT 49','LOT 48','LOT 47','LOT 46'];
+
+for (let i = 0; i < 6; i++) {
+  const x0 = lotX(i);
+  const cx = x0 + LOT_W / 2;
+  const lotName = lotNames[i];
+
+  // ── Ground floor body ──────────────────────────────────────────────────────
+  const gfBody = box(LOT_W - 0.04, FLR_H, BUILD_D, i % 2 === 0 ? M.brick : M.brickDark);
+  gfBody.position.set(cx, FLR_H / 2, -BUILD_D / 2);
+  gfBody.userData = { type:'building', title: lotName + ' Ground Floor', info:'Living · Dining · Kitchen · PDR · Store' };
+  scene.add(gfBody);
+  addHoverable(gfBody, gfBody.userData.title, gfBody.userData.info);
+
+  // ── First floor body (behind balcony) ─────────────────────────────────────
+  const ff1Body = box(LOT_W - 0.04, FLR_H, BUILD_D - BAL_D, i % 2 === 0 ? M.brickDark : M.brick);
+  ff1Body.position.set(cx, FLR_H + FLR_H / 2, -(BUILD_D - BAL_D) / 2 - BAL_D);
+  scene.add(ff1Body);
+
+  // ── Second floor body ─────────────────────────────────────────────────────
+  const sf2Body = box(LOT_W - 0.04, FLR_H, BUILD_D, i % 2 === 0 ? M.brick : M.brickDark);
+  sf2Body.position.set(cx, FLR_H * 2 + FLR_H / 2, -BUILD_D / 2);
+  sf2Body.userData = { type:'building', title: lotName + ' Second Floor', info:'Bed 1 · Bed 2 · Bath · Robe' };
+  scene.add(sf2Body);
+  addHoverable(sf2Body, sf2Body.userData.title, sf2Body.userData.info);
+
+  // ── Roof slab ─────────────────────────────────────────────────────────────
+  const roofSlab = box(LOT_W - 0.02, 0.25, BUILD_D + 0.1, M.roofing);
+  roofSlab.position.set(cx, FLR_H * 3 + 0.125, -BUILD_D / 2);
+  scene.add(roofSlab);
+
+  // ── Balcony slab (First Floor) ────────────────────────────────────────────
+  const balSlab = box(LOT_W - 0.04, BAL_SLB, BAL_D, M.concrete);
+  balSlab.position.set(cx, FLR_H - BAL_SLB / 2, BAL_D / 2);
+  balSlab.userData = { type:'building', title: lotName + ' Balcony Slab', info:'First floor balcony · Conc. slab' };
+  scene.add(balSlab);
+  addHoverable(balSlab, balSlab.userData.title, balSlab.userData.info);
+
+  // ── Ground floor front windows ────────────────────────────────────────────
+  const gfWin = box(3.2, 2.0, 0.08, M.glass);
+  gfWin.position.set(cx, 1.1, 0.04);
+  scene.add(gfWin);
+
+  // ── Second floor front windows ────────────────────────────────────────────
+  const sfWin = box(2.5, 1.8, 0.08, M.glass);
+  sfWin.position.set(cx, FLR_H * 2 + 1.0, 0.04);
+  scene.add(sfWin);
+}
+
+// ─── BALUSTRADES (B Series) ───────────────────────────────────────────────────
+// All 50×15 AL fin, 1400mm tall, face-hung at front of balcony slab
+// B1 (lots 51,48,47,46 mapped to indices 0,3,4,5 — wait, let me re-check)
+// From PDF: B1 @ LOT 46,47,48,51 (i=5,4,3,0); B1A @ LOT 49,50 (i=2,1)
+// B2 (rear) @ LOT 47,48,49,50 (i=4,3,2,1)
+// B3A @ LOT 46 (i=5); B3B @ LOT 51 (i=0)
+// B4 sides @ LOT 46,51; B5 sides @ LOT 47,48,49,50
+
+function buildBalustrade(cx, y, z, width, finCount, label, info) {
+  const group = new THREE.Group();
+  const BAL_H = 1.4;
+
+  // Top rail: 75×25 RHS
+  const topRail = box(width, 0.025, 0.075, M.alum);
+  topRail.position.set(cx, y + BAL_H, z);
+  scene.add(topRail);
+
+  // Bottom flat bar: 150×8
+  const botBar = box(width, 0.008, 0.15, M.alum);
+  botBar.position.set(cx, y + 0.12, z);
+  scene.add(botBar);
+
+  // Vertical fins: 50×15, spaced ~95mm c/c
+  const finSpacing = 0.095;
+  const finW = 0.015;
+  const nFins = Math.max(finCount, Math.floor(width / finSpacing));
+  const totalFinW = (nFins - 1) * finSpacing;
+  for (let f = 0; f < nFins; f++) {
+    const fx = cx - totalFinW / 2 + f * finSpacing;
+    const fin = box(finW, BAL_H - 0.17, 0.05, M.alum);
+    fin.position.set(fx, y + BAL_H / 2 + 0.08, z);
+    fin.userData = { type:'balustrade', title: label, info };
+    scene.add(fin);
+    addHoverable(fin, label, info);
+  }
+  return group;
+}
+
+// Balcony front edge z position
+const BAL_FRONT_Z = BAL_D; // = 2.73
+const BAL_Y = FLR_H; // top of first floor slab
+
+// B1: Lots 51,48,47,46 (i=0,3,4,5), W=3.53
+const B1_lots = [0,3,4,5];
+B1_lots.forEach(i => {
+  buildBalustrade(lotX(i)+LOT_W/2, BAL_Y, BAL_FRONT_Z,
+    3.53, 37, 'B1 – Front Balustrade',
+    'W=3530 · H=1400 · 50×15 AL fins\nLot '+lotNames[i]);
+});
+
+// B1A: Lots 50,49 (i=1,2), W=3.60
+[1,2].forEach(i => {
+  buildBalustrade(lotX(i)+LOT_W/2, BAL_Y, BAL_FRONT_Z,
+    3.60, 38, 'B1A – Front Balustrade',
+    'W=3600 · H=1400 · 50×15 AL fins\nLot '+lotNames[i]);
+});
+
+// B2: Rear balustrade, Lots 47,48,49,50 (i=1,2,3,4), W=3.59
+// Placed at rear of first floor (balcony at back of these lots)
+[1,2,3,4].forEach(i => {
+  buildBalustrade(lotX(i)+LOT_W/2, BAL_Y, -(BUILD_D - BAL_D) - BAL_D,
+    3.59, 37, 'B2 – Rear Balustrade',
+    'W=3590 · H=1400 · 50×15 AL fins\nLot '+lotNames[i]);
+});
+
+// B3A: Lot 46 (i=5), W=4.10 — wider end lot
+buildBalustrade(lotX(5)+LOT_W/2, BAL_Y, BAL_FRONT_Z,
+  4.10, 43, 'B3A – Front Balustrade (Corner)',
+  'W=4100 · H=1400 · End lot\nLOT 46');
+
+// B3B: Lot 51 (i=0), W=4.30
+buildBalustrade(lotX(0)+LOT_W/2, BAL_Y, BAL_FRONT_Z,
+  4.30, 45, 'B3B – Front Balustrade (Corner)',
+  'W=4300 · H=1400 · End lot\nLOT 51');
+
+// B4: Side balustrades, Lots 46,51 (i=0,5), W=1.5m, along side of balcony
+function sideBalustrade(x, y, z0, z1, label, info) {
+  const L = Math.abs(z1 - z0);
+  const nFins = Math.floor(L / 0.095);
+  const zc = (z0 + z1) / 2;
+  const topRail = box(0.025, 0.025, L, M.alum);
+  topRail.position.set(x, y + 1.4, zc); scene.add(topRail);
+  const botBar = box(0.008, 0.008, L, M.alum);
+  botBar.position.set(x, y + 0.12, zc); scene.add(botBar);
+  for (let f = 0; f < nFins; f++) {
+    const fz = z0 + f * 0.095;
+    const fin = box(0.05, 1.22, 0.015, M.alum);
+    fin.position.set(x, y + 0.79, fz);
+    fin.userData = { type:'balustrade', title: label, info };
+    scene.add(fin);
+    addHoverable(fin, label, info);
+  }
+}
+// B4 Lot 46 (i=5): right side of balcony
+sideBalustrade(lotX(5)+LOT_W-0.02, BAL_Y, 0.05, 1.5, 'B4 – Side Balustrade', 'W=1500 · H=1400\nLOT 46');
+// B4 Lot 51 (i=0): left side of balcony
+sideBalustrade(lotX(0)+0.02, BAL_Y, 0.05, 1.5, 'B4 – Side Balustrade', 'W=1500 · H=1400\nLOT 51');
+
+// B5: side balustrades mid lots W=900mm
+[1,2,3,4].forEach(i => {
+  sideBalustrade(lotX(i)+(i>0?0.02:LOT_W-0.02), BAL_Y, 0.05, 0.9,
+    'B5 – Side Balustrade', 'W=900 · H=1400\nLot '+lotNames[i]);
+});
+
+// ─── PERGOLAS (P Series) ──────────────────────────────────────────────────────
+// Solaris 150-S, 150×50 RHS profile, louvred top, @560mm spacing
+// Height: at top of first floor slab + balustrade height + a bit
+
+const PERG_Y = BAL_Y + 1.4 + 0.05; // top of balustrade = pergola beam height
+const PERG_H = 0.15;  // beam height
+const LOUV_H = 0.05;  // louvre blade thickness
+const LOUV_W = 0.15;  // 150mm louvre width
+
+function buildPergola(cx, y, z_front, z_back, width, label, info) {
+  // Front and back beams: 150×50 AL RHS
+  const beamF = box(width, PERG_H, 0.05, M.pergola);
+  beamF.position.set(cx, y, z_front); scene.add(beamF);
+  const beamB = box(width, PERG_H, 0.05, M.pergola);
+  beamB.position.set(cx, y, z_back); scene.add(beamB);
+
+  // Side beams
+  const depth = Math.abs(z_front - z_back);
+  const sideL = box(0.05, PERG_H, depth, M.pergola);
+  sideL.position.set(cx - width/2, y, (z_front+z_back)/2); scene.add(sideL);
+  const sideR = box(0.05, PERG_H, depth, M.pergola);
+  sideR.position.set(cx + width/2, y, (z_front+z_back)/2); scene.add(sideR);
+
+  // Louvre blades at 560mm centres
+  const nLouvres = Math.floor(depth / 0.56);
+  for (let l = 0; l <= nLouvres; l++) {
+    const lz = z_back + l * 0.56;
+    if (lz > z_front + 0.05) break;
+    const louv = box(width - 0.06, LOUV_H, LOUV_W, M.pergola);
+    louv.position.set(cx, y + PERG_H/2 + LOUV_H/2, lz);
+    louv.userData = { type:'pergola', title: label, info };
+    scene.add(louv);
+    addHoverable(louv, label, info);
+  }
+
+  // Vertical posts at corners (150×50 SHS)
+  [[cx-width/2, z_front],[cx+width/2, z_front],[cx-width/2, z_back],[cx+width/2, z_back]].forEach(([px,pz]) => {
+    const post = box(0.05, y - BAL_Y, 0.15, M.alumDark);
+    post.position.set(px, BAL_Y + (y - BAL_Y)/2, pz);
+    scene.add(post);
+  });
+}
+
+// P1: Lots 46,51 (i=5,0), W=2.581m — narrower end pergola
+[0,5].forEach(i => {
+  buildPergola(lotX(i)+LOT_W/2, PERG_Y, BAL_FRONT_Z-0.05, 0.15,
+    2.581, 'P1 – Fixed Pergola',
+    'W=2581 · Solaris 150-S louvre\nLOT '+lotNames[i]);
+});
+
+// P2: Lots 46,48,49,50 (i=5,3,2,1), W=3.776m, D=2.730m — standard pergola
+[1,2,3,5].forEach(i => {
+  buildPergola(lotX(i)+LOT_W/2, PERG_Y, BAL_FRONT_Z-0.05, BAL_FRONT_Z-2.73,
+    3.776, 'P2 – Fixed Pergola',
+    'W=3776 · D=2730 · Solaris 150-S\nLot '+lotNames[i]);
+});
+
+// P3: Lot 46 (i=5) — large side pergola W=5.936m, D=2.424m
+{
+  const i = 5;
+  buildPergola(lotX(i)+LOT_W/2+1.5, PERG_Y, BAL_FRONT_Z-0.05, BAL_FRONT_Z-2.424,
+    5.936, 'P3 – Side Pergola (Large)',
+    'W=5936 · D=2424 · Solaris 150-S\nLOT 46');
+}
+
+// P4: Lot 51 (i=0) — large side pergola W=6.226m, D=2.423m
+{
+  const i = 0;
+  buildPergola(lotX(i)+LOT_W/2-1.5, PERG_Y, BAL_FRONT_Z-0.05, BAL_FRONT_Z-2.423,
+    6.226, 'P4 – Side Pergola (Large)',
+    'W=6226 · D=2423 · Solaris 150-S\nLOT 51');
+}
+
+// ─── LOUVRE PANELS LP (Solaris 100-S) ────────────────────────────────────────
+// Mounted at first floor, 460mm tall, 140mm RHS frame — side of balcony / window screens
+
+function buildLPPanel(cx, y, z, width, height, isVertical, label, info) {
+  // Outer RHS frame: 100×50
+  const frameT = 0.05;
+  if (!isVertical) {
+    const frameTop = box(width, frameT, 0.1, M.lp);
+    frameTop.position.set(cx, y+height, z); scene.add(frameTop);
+    const frameBot = box(width, frameT, 0.1, M.lp);
+    frameBot.position.set(cx, y, z); scene.add(frameBot);
+    const frameL = box(0.1, height, frameT, M.lp);
+    frameL.position.set(cx-width/2, y+height/2, z); scene.add(frameL);
+    const frameR = box(0.1, height, frameT, M.lp);
+    frameR.position.set(cx+width/2, y+height/2, z); scene.add(frameR);
+    // Louvre blades (horizontal, Solaris 100-S = 100mm wide blades)
+    const nB = Math.floor(height / 0.12);
+    for (let b = 0; b <= nB; b++) {
+      const by = y + b * 0.12;
+      const blade = box(width-0.12, 0.012, 0.1, M.lp);
+      blade.position.set(cx, by, z);
+      blade.userData = { type:'lp', title: label, info };
+      scene.add(blade);
+      addHoverable(blade, label, info);
+    }
+  }
+}
+
+// LP1B: Lots 46,47,48,51 (i=5,4,3,0), W=3.5m, H=0.46m — front face
+[0,3,4,5].forEach(i => {
+  buildLPPanel(lotX(i)+LOT_W/2, BAL_Y+1.4+0.02, BAL_FRONT_Z+0.01,
+    3.5, 0.46, false, 'LP1B – Louvre Panel',
+    'W=3500 · H=460 · Solaris 100-S · 100×50 RHS frame\nLot '+lotNames[i]);
+});
+
+// LP1A: Lots 49,50 (i=2,1)
+[1,2].forEach(i => {
+  buildLPPanel(lotX(i)+LOT_W/2, BAL_Y+1.4+0.02, BAL_FRONT_Z+0.01,
+    3.5, 0.46, false, 'LP1A – Louvre Panel',
+    'W=3500 · H=460 · Solaris 100-S\nLot '+lotNames[i]);
+});
+
+// LP1C: Side panels W=1.5m, H=0.46m — Lots 46,47,48,51
+[0,3,4,5].forEach(i => {
+  buildLPPanel(lotX(i)+LOT_W/2, BAL_Y+1.4+0.02, BAL_FRONT_Z+0.01,
+    1.5, 0.46, false, 'LP1C – Side Louvre Panel',
+    'W=1500 · H=460 · Solaris 100-S\nLot '+lotNames[i]);
+});
+
+// ─── PRIVACY SCREENS (SC Series) ─────────────────────────────────────────────
+// Solaris 150-S vertical louvres, flat bar frame
+
+function buildScreen(x, y, z, width, height, depth, isVerticalLouvre, label, info) {
+  // Flat bar frame: 150×4
+  const frameL = box(0.004, height, 0.15, M.screen);
+  frameL.position.set(x, y+height/2, z); scene.add(frameL);
+  const frameR = box(0.004, height, 0.15, M.screen);
+  frameR.position.set(x+width, y+height/2, z); scene.add(frameR);
+  // Louvre blades: 150-S @140 CRS
+  const bladeSpacing = 0.14;
+  const nBlades = Math.floor(width / bladeSpacing);
+  for (let b = 0; b <= nBlades; b++) {
+    const bx = x + b * bladeSpacing;
+    if (bx > x + width + 0.01) break;
+    const angle = isVerticalLouvre ? Math.PI/2 : Math.PI/4;
+    const blade = box(0.004, height - 0.02, 0.15, M.screen);
+    blade.position.set(bx, y+height/2, z);
+    blade.userData = { type:'screen', title: label, info };
+    scene.add(blade);
+    addHoverable(blade, label, info);
+  }
+}
+
+// SC1: Between lots 47-50 (i=1,2,3,4), W=1.81m, H=1.72m, at party walls
+[1,2,3,4].forEach(i => {
+  buildScreen(lotX(i)+0.01, BAL_Y, 0.3,
+    1.81, 1.72, 0.15, true,
+    'SC1 – Privacy Screen',
+    'W=1810 · H=1720 · Solaris 150-S @140c/c 45°\nLot '+lotNames[i]);
+});
+
+// SC2: Lots 46,51, W=1.81m, H=2.996m — full height screens
+[0,5].forEach(i => {
+  buildScreen(lotX(i)+(i===0?0.01:LOT_W-1.82), BAL_Y, 0.3,
+    1.81, 2.996, 0.15, false,
+    'SC2 – Full Height Screen',
+    'W=1810 · H=2996 · Solaris 150-S @140c/c 90°\nLot '+lotNames[i]);
+});
+
+// SC3: Lot 51 (i=0), W=2.45m, H=3.143m — corner screen
+{
+  buildScreen(lotX(0)-0.15, BAL_Y, -0.2,
+    2.45, 3.143, 0.15, false,
+    'SC3 – Corner Privacy Screen',
+    'W=2450 · H=3143 · Solaris 150-S 90°\nLOT 51');
+}
+
+// ─── SUN SHADES (EB Series) ───────────────────────────────────────────────────
+// 300×50 Clip Louvre, horizontal overhang above 2nd floor windows
+// Rear-mount channel bracket
+
+function buildSunshade(cx, y, z_front, width, depth, label, info) {
+  // Support brackets
+  const nBrackets = Math.floor(width / 0.6) + 1;
+  for (let b = 0; b < nBrackets; b++) {
+    const bx = cx - width/2 + b * (width/(nBrackets-1));
+    const brk = box(0.05, 0.05, depth, M.sunshade);
+    brk.position.set(bx, y+0.025, z_front - depth/2);
+    scene.add(brk);
+  }
+  // Clip louvre blades: 300×50, horizontal
+  const nLouvres = Math.floor(depth / 0.08);
+  for (let l = 0; l <= nLouvres; l++) {
+    const lz = z_front - l * 0.08;
+    const louv = box(width, 0.05, 0.3, M.sunshade);
+    louv.position.set(cx, y, lz);
+    louv.userData = { type:'sunshade', title: label, info };
+    scene.add(louv);
+    addHoverable(louv, label, info);
+  }
+}
+
+const SHADE_Y = FLR_H * 2 + FLR_H * 0.85; // above 2nd floor window top
+const SHADE_Z = 0.03;
+
+// EB1: All lots, W=2.65m, D=2.07m
+for (let i = 0; i < 6; i++) {
+  buildSunshade(lotX(i)+LOT_W/2, SHADE_Y, SHADE_Z,
+    2.65, 2.07, 'EB1 – Sun Shade',
+    'W=2650 · D=2070 · 300×50 Clip Louvre\nLot '+lotNames[i]);
+}
+
+// EB2: Lot 46 (i=5) corner, W=2.07m
+buildSunshade(lotX(5)+LOT_W-1.035, SHADE_Y, SHADE_Z,
+  2.07, 1.5, 'EB2 – Corner Sun Shade',
+  'W=2070 · 300×50 Clip Louvre\nLOT 46');
+
+// EB3: Lot 51 (i=0) corner, W=1.45m
+buildSunshade(lotX(0)+0.725, SHADE_Y, SHADE_Z,
+  1.45, 1.5, 'EB3 – Corner Sun Shade',
+  'W=1450 · 300×50 Clip Louvre\nLOT 51');
+
+// ─── LOT SEPARATION LINES (party walls shown as thin fins) ───────────────────
+for (let i = 1; i < 6; i++) {
+  const wall = box(0.12, FLR_H * 3, BUILD_D, M.concrete);
+  wall.position.set(lotX(i), FLR_H * 1.5, -BUILD_D/2);
+  scene.add(wall);
+}
+
+// ─── FRONT DRIVEWAY AREA ─────────────────────────────────────────────────────
+{
+  const dway = box(TOTAL_W, 0.05, 5, new THREE.MeshStandardMaterial({color:0x404040,roughness:0.9}));
+  dway.position.set(TOTAL_W/2, 0.025, 4);
+  scene.add(dway);
+  // Lot boundary lines on driveway
+  for (let i = 1; i < 6; i++) {
+    const line = box(0.05, 0.06, 5, new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.5}));
+    line.position.set(lotX(i), 0.03, 4);
+    scene.add(line);
+  }
+}
+
+// ─── ENVIRONMENT: Grid + Sky ──────────────────────────────────────────────────
+{
+  const gridHelper = new THREE.GridHelper(80, 40, 0x333355, 0x222244);
+  gridHelper.position.set(TOTAL_W/2, 0, -10);
+  scene.add(gridHelper);
+}
+
+// Distant environment boxes (street scene)
+{
+  const treeMat = new THREE.MeshStandardMaterial({color:0x1a5c2a, roughness:1.0});
+  const trunkMat = new THREE.MeshStandardMaterial({color:0x4a3020, roughness:1.0});
+  [[5,8],[15,9],[28,8.5],[35,9]].forEach(([tx,th]) => {
+    const trunk = box(0.3, 1.5, 0.3, trunkMat);
+    trunk.position.set(tx, 0.75, 8); scene.add(trunk);
+    const canopy = new THREE.Mesh(new THREE.SphereGeometry(1.2,8,6), treeMat);
+    canopy.position.set(tx, 2.5+th*0.1, 8); canopy.castShadow=true; scene.add(canopy);
+  });
+}
+
+// ─── RAYCASTER / HOVER ───────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+const ttTitle = document.getElementById('tt-title');
+const ttLine = document.getElementById('tt-line');
+
+renderer.domElement.addEventListener('mousemove', function(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = hoverables.map(h => h.mesh);
+  const hits = raycaster.intersectObjects(meshes, true);
+  if (hits.length > 0) {
+    const obj = hits[0].object;
+    const data = obj.userData;
+    if (data && data.title) {
+      ttTitle.textContent = data.title;
+      ttLine.innerHTML = (data.info||'').replace(/\n/g,'<br>');
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 10) + 'px';
+      renderer.domElement.style.cursor = 'pointer';
+      return;
+    }
+  }
+  tooltip.style.display = 'none';
+  renderer.domElement.style.cursor = 'default';
+});
+
+// ─── LEGEND CLICK FILTER ─────────────────────────────────────────────────────
+const typeVisible = { balustrade:true, lp:true, screen:true, sunshade:true, pergola:true, building:true };
+document.querySelectorAll('.legend-item').forEach(el => {
+  el.addEventListener('click', () => {
+    const t = el.dataset.type;
+    typeVisible[t] = !typeVisible[t];
+    el.style.opacity = typeVisible[t] ? '1' : '0.35';
+    scene.traverse(obj => {
+      if (obj.userData && obj.userData.type === t) {
+        obj.visible = typeVisible[t];
+      }
+    });
+    // building type covers generic building parts
+    if (t === 'building') {
+      scene.traverse(obj => {
+        if (obj.isMesh && !obj.userData.type) obj.visible = typeVisible[t];
+      });
+    }
+  });
+});
+
+// ─── LOT LABEL SPRITES ────────────────────────────────────────────────────────
+function makeLabel(text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 160; canvas.height = 48;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(10,10,40,0.7)';
+  ctx.roundRect(2,2,156,44,8);
+  ctx.fill();
+  ctx.fillStyle = '#aaddff';
+  ctx.font = 'bold 20px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 80, 24);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.position.set(x, y, z);
+  sprite.scale.set(3.5, 1.0, 1);
+  scene.add(sprite);
+}
+for (let i = 0; i < 6; i++) {
+  makeLabel(lotNames[i], lotX(i)+LOT_W/2, FLR_H*3+1.2, 1.0);
+}
+
+// ─── ANIMATE ──────────────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// ─── RESIZE ───────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
