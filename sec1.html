@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sec1 – Sheet 4.02 | SC1 & LP Fixing Details | AURAE</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#0d0d1a; overflow:hidden; font-family:'Segoe UI',sans-serif; }
+canvas { position:fixed; top:0; left:0; width:100% !important; height:100% !important; display:block; }
+
+#topbar {
+  position:fixed; top:0; left:0; right:0; height:48px;
+  background:rgba(5,5,20,0.9); border-bottom:1px solid rgba(255,255,255,0.1);
+  display:flex; align-items:center; gap:16px; padding:0 18px; z-index:20;
+}
+#topbar a { color:#7eb5d6; font-size:12px; text-decoration:none; white-space:nowrap; }
+#topbar a:hover { color:#fff; }
+#topbar h1 { color:#fff; font-size:13px; font-weight:700; letter-spacing:.4px; }
+#topbar .sub { color:#888; font-size:11px; margin-left:auto; white-space:nowrap; }
+
+#panel-labels {
+  position:fixed; top:58px; left:0; right:0;
+  display:flex; justify-content:space-around; pointer-events:none; z-index:15;
+}
+.panel-label {
+  background:rgba(5,5,20,0.8); border:1px solid rgba(255,255,255,0.1);
+  border-radius:6px; padding:6px 14px; text-align:center; pointer-events:none;
+}
+.panel-label .det-num { color:#7eb5d6; font-size:10px; font-weight:700; letter-spacing:1px; }
+.panel-label .det-title { color:#ccc; font-size:11px; margin-top:2px; }
+.panel-label .det-scale { color:#666; font-size:10px; margin-top:1px; }
+
+#controls {
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  display:flex; gap:10px; z-index:20;
+}
+.btn {
+  background:rgba(10,10,40,0.9); border:1px solid rgba(255,255,255,0.18);
+  color:#ddd; padding:7px 18px; border-radius:6px; cursor:pointer; font-size:12px;
+  transition:all .15s;
+}
+.btn:hover { background:rgba(30,30,80,0.95); color:#fff; border-color:rgba(255,255,255,0.35); }
+.btn.active { background:rgba(20,80,160,0.9); border-color:#4a8fd4; color:#fff; }
+
+/* HTML annotation labels */
+.ann {
+  position:fixed; pointer-events:none; z-index:16;
+  display:flex; align-items:center; gap:5px; transform:translateY(-50%);
+}
+.ann-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.ann-line { height:1px; flex-shrink:0; }
+.ann-text {
+  background:rgba(5,5,18,0.85); border:1px solid rgba(255,255,255,0.12);
+  border-radius:4px; padding:3px 7px; white-space:nowrap;
+  font-size:10px; color:#ccc; line-height:1.4;
+}
+.ann-text .dim { color:#7eb5d6; font-size:9px; display:block; }
+.ann.right { flex-direction:row-reverse; }
+
+#tooltip {
+  position:fixed; display:none; z-index:25;
+  background:rgba(5,5,20,0.95); border:1px solid rgba(255,255,255,0.15);
+  border-radius:7px; padding:9px 13px; pointer-events:none;
+}
+#tooltip .tt-name { color:#7eb5d6; font-weight:700; font-size:12px; margin-bottom:4px; }
+#tooltip .tt-spec { color:#aaa; font-size:11px; line-height:1.6; }
+
+#hint {
+  position:fixed; bottom:58px; left:50%; transform:translateX(-50%);
+  color:#555; font-size:11px; pointer-events:none; white-space:nowrap;
+}
+
+#legend {
+  position:fixed; right:14px; top:58px;
+  background:rgba(5,5,20,0.85); border:1px solid rgba(255,255,255,0.1);
+  border-radius:7px; padding:10px 13px; z-index:15; min-width:180px;
+}
+#legend h3 { color:#888; font-size:9px; letter-spacing:1px; text-transform:uppercase; margin-bottom:7px; }
+.leg { display:flex; align-items:center; gap:7px; margin-bottom:4px; }
+.leg-sw { width:12px; height:12px; border-radius:2px; flex-shrink:0; }
+.leg-lbl { color:#bbb; font-size:10px; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="index.html">← Main Model</a>
+  <h1>SHEET 4.02 &nbsp;·&nbsp; FIXING DETAILS &nbsp;·&nbsp; SC1 &amp; LP's</h1>
+  <span class="sub">JOB 27294 &nbsp;|&nbsp; LOTS 46–51 ORAN PARK &nbsp;|&nbsp; AURAE &nbsp;|&nbsp; SCALE 1:5 @ A3</span>
+</div>
+
+<div id="panel-labels">
+  <div class="panel-label">
+    <div class="det-num">DETAIL 03</div>
+    <div class="det-title">SC1 – Flat Bar to Brick Parapet</div>
+    <div class="det-scale">Soffit &amp; Parapet Connections</div>
+  </div>
+  <div class="panel-label">
+    <div class="det-num">DETAIL 04</div>
+    <div class="det-title">LP's – RHS Frame to Brick Veneer</div>
+    <div class="det-scale">100×50×3 AL RHS Frame Connection</div>
+  </div>
+</div>
+
+<div id="legend">
+  <h3>Materials</h3>
+  <div class="leg"><div class="leg-sw" style="background:#8ab4c8"></div><span class="leg-lbl">Aluminium (AL)</span></div>
+  <div class="leg"><div class="leg-sw" style="background:#c84a3a"></div><span class="leg-lbl">Brick Veneer / Parapet</span></div>
+  <div class="leg"><div class="leg-sw" style="background:#c8a26a"></div><span class="leg-lbl">Timber Framing</span></div>
+  <div class="leg"><div class="leg-sw" style="background:#d0d0d0"></div><span class="leg-lbl">Stainless Steel (SS)</span></div>
+  <div class="leg"><div class="leg-sw" style="background:#1a1a1a;border:1px solid #444"></div><span class="leg-lbl">EPDM / Rubber</span></div>
+  <div class="leg"><div class="leg-sw" style="background:#444"></div><span class="leg-lbl">Plastic Plug</span></div>
+</div>
+
+<div id="controls">
+  <button class="btn" id="btn-explode" onclick="toggleExplode()">⊕ Explode View</button>
+  <button class="btn" id="btn-reset" onclick="resetCamera()">↺ Reset View</button>
+</div>
+
+<div id="hint">Left drag: Orbit &nbsp;·&nbsp; Right drag: Pan &nbsp;·&nbsp; Scroll: Zoom &nbsp;·&nbsp; Hover: Info</div>
+
+<div id="tooltip">
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-spec" id="tt-spec"></div>
+</div>
+
+<!-- Annotation labels (positioned via JS) -->
+<script>
+const ANN_DEFS = [
+  // SC1 Detail (left side)
+  { id:'a-soffit',   label:'Timber Framing',       dim:'(by others)',            side:'right', worldX:-3.5, worldY:1.35, worldZ:0,    color:'#c8a26a' },
+  { id:'a-tek',      label:'14g SS TEK Screw',      dim:'Ø4mm × 60mm',           side:'right', worldX:-2.8, worldY:1.18, worldZ:0.07, color:'#d0d0d0' },
+  { id:'a-packer',   label:'Timber Packer',         dim:'(by others)',            side:'right', worldX:-2.5, worldY:1.08, worldZ:0.07, color:'#c8a26a' },
+  { id:'a-epdm-t',   label:'EPDM Separation',       dim:'3mm thick',             side:'right', worldX:-2.1, worldY:1.01, worldZ:0.06, color:'#555' },
+  { id:'a-flatT',    label:'150×4mm AL Flat Bar',   dim:'150mm × 4mm × full W',  side:'right', worldX:-1.9, worldY:0.97, worldZ:0.08, color:'#8ab4c8' },
+  { id:'a-louvre',   label:'Solaris 150-S Louvre',  dim:'@140 CRS · 45° pos.',   side:'left',  worldX:-2.55,worldY:0.5,  worldZ:0.1,  color:'#7ec8c8' },
+  { id:'a-flatB',    label:'150×4mm AL Flat Bar',   dim:'150mm × 4mm · Bottom',  side:'right', worldX:-1.9, worldY:0.02, worldZ:0.08, color:'#8ab4c8' },
+  { id:'a-epdm-b',   label:'EPDM Separation',       dim:'3mm isolation layer',   side:'right', worldX:-2.1, worldY:-0.04,worldZ:0.06, color:'#555' },
+  { id:'a-spacer',   label:'SS Spacer Tube',        dim:'Ø12 × 25mm',           side:'right', worldX:-2.4, worldY:-0.07,worldZ:0,    color:'#d0d0d0' },
+  { id:'a-screw-sc', label:'SS M8 Coach Screw',     dim:'M8 × 120mm',           side:'right', worldX:-2.6, worldY:-0.12,worldZ:0,    color:'#d0d0d0' },
+  { id:'a-timber-p', label:'Timber Framing',        dim:'(by others)',            side:'right', worldX:-2.9, worldY:-0.4, worldZ:0,    color:'#c8a26a' },
+  { id:'a-brick-p',  label:'Brick Parapet',         dim:'Top surface shown',     side:'left',  worldX:-3.6, worldY:-0.35,worldZ:0,    color:'#c84a3a' },
+
+  // LP's Detail (right side)
+  { id:'b-timber',   label:'Timber Framing',        dim:'(by others)',            side:'left',  worldX:1.6,  worldY:0.3,  worldZ:-0.18, color:'#c8a26a' },
+  { id:'b-brick',    label:'Brick Veneer',          dim:'110mm thick',           side:'left',  worldX:1.8,  worldY:0.0,  worldZ:-0.05, color:'#c84a3a' },
+  { id:'b-plug',     label:'Plastic Plug',          dim:'Ø10mm × 60mm',         side:'left',  worldX:2.0,  worldY:-0.2, worldZ:-0.03, color:'#555' },
+  { id:'b-epdm',     label:'EPDM Tape',             dim:'3mm × 50mm wide',      side:'right', worldX:2.4,  worldY:0.2,  worldZ:0.003, color:'#555' },
+  { id:'b-spacer',   label:'SS Spacer Tube',        dim:'Ø12 × 30mm',          side:'right', worldX:2.5,  worldY:0.4,  worldZ:0.015, color:'#d0d0d0' },
+  { id:'b-screw',    label:'SS M8 Coach Screw',     dim:'M8 · Counterbore',     side:'right', worldX:2.6,  worldY:0.55, worldZ:0.03,  color:'#d0d0d0' },
+  { id:'b-rhs',      label:'100×50×3 AL RHS Frame', dim:'100mm × 50mm × 3mm',  side:'right', worldX:2.7,  worldY:0.0,  worldZ:0.07,  color:'#8ab4c8' },
+];
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── OrbitControls (same inline implementation as main model) ────────────────
+(function(){
+  THREE.OrbitControls = function(object, domElement){
+    this.object = object; this.domElement = domElement||document;
+    this.enabled=true; this.target=new THREE.Vector3();
+    this.minDistance=0.5; this.maxDistance=30;
+    this.enableDamping=true; this.dampingFactor=0.08;
+    this.enableZoom=true; this.zoomSpeed=1.2;
+    this.rotateSpeed=0.8; this.panSpeed=0.8;
+    var scope=this,STATE={NONE:-1,ROTATE:0,DOLLY:1,PAN:2},state=STATE.NONE;
+    var spherical=new THREE.Spherical(),sphericalDelta=new THREE.Spherical();
+    var scale=1,panOffset=new THREE.Vector3();
+    var rotateStart=new THREE.Vector2(),rotateEnd=new THREE.Vector2(),rotateDelta=new THREE.Vector2();
+    var panStart=new THREE.Vector2(),panEnd=new THREE.Vector2(),panDelta=new THREE.Vector2();
+    this.update=function(){
+      var offset=new THREE.Vector3();
+      var quat=new THREE.Quaternion().setFromUnitVectors(object.up,new THREE.Vector3(0,1,0));
+      var quatInverse=quat.clone().invert();
+      return function(){
+        var position=scope.object.position;
+        offset.copy(position).sub(scope.target);
+        offset.applyQuaternion(quat);
+        spherical.setFromVector3(offset);
+        spherical.theta+=sphericalDelta.theta;
+        spherical.phi+=sphericalDelta.phi;
+        spherical.phi=Math.max(0.05,Math.min(Math.PI*0.88,spherical.phi));
+        spherical.makeSafe();
+        spherical.radius*=scale;
+        spherical.radius=Math.max(scope.minDistance,Math.min(scope.maxDistance,spherical.radius));
+        scope.target.addScaledVector(panOffset,1);
+        offset.setFromSpherical(spherical);
+        offset.applyQuaternion(quatInverse);
+        position.copy(scope.target).add(offset);
+        scope.object.lookAt(scope.target);
+        if(scope.enableDamping){sphericalDelta.theta*=(1-scope.dampingFactor);sphericalDelta.phi*=(1-scope.dampingFactor);panOffset.multiplyScalar(1-scope.dampingFactor);}
+        else{sphericalDelta.set(0,0,0);panOffset.set(0,0,0);}
+        scale=1;
+      };
+    }();
+    function rotateLeft(a){sphericalDelta.theta-=a;} function rotateUp(a){sphericalDelta.phi-=a;}
+    function dollyIn(s){scale/=s;} function dollyOut(s){scale*=s;}
+    var v=new THREE.Vector3();
+    function panLeft(d,m){v.setFromMatrixColumn(m,0);v.multiplyScalar(-d);panOffset.add(v);}
+    function panUp(d,m){v.setFromMatrixColumn(m,1);v.multiplyScalar(d);panOffset.add(v);}
+    function pan(dx,dy){var h=scope.domElement.clientHeight||window.innerHeight;panLeft(2*dx*scope.object.position.distanceTo(scope.target)/h,scope.object.matrix);panUp(2*dy*scope.object.position.distanceTo(scope.target)/h,scope.object.matrix);}
+    domElement.addEventListener('contextmenu',function(e){e.preventDefault();});
+    domElement.addEventListener('mousedown',function(e){if(!scope.enabled)return;if(e.button===0){state=STATE.ROTATE;rotateStart.set(e.clientX,e.clientY);}else if(e.button===2){state=STATE.PAN;panStart.set(e.clientX,e.clientY);}});
+    domElement.addEventListener('mousemove',function(e){if(!scope.enabled)return;if(state===STATE.ROTATE){rotateEnd.set(e.clientX,e.clientY);rotateDelta.subVectors(rotateEnd,rotateStart).multiplyScalar(scope.rotateSpeed);var h=scope.domElement.clientHeight||window.innerHeight;rotateLeft(2*Math.PI*rotateDelta.x/h);rotateUp(2*Math.PI*rotateDelta.y/h);rotateStart.copy(rotateEnd);scope.update();}else if(state===STATE.PAN){panEnd.set(e.clientX,e.clientY);panDelta.subVectors(panEnd,panStart).multiplyScalar(scope.panSpeed);pan(panDelta.x,panDelta.y);panStart.copy(panEnd);scope.update();}});
+    domElement.addEventListener('mouseup',function(){state=STATE.NONE;});
+    domElement.addEventListener('wheel',function(e){if(!scope.enabled)return;if(e.deltaY<0)dollyOut(Math.pow(0.95,scope.zoomSpeed));else dollyIn(Math.pow(0.95,scope.zoomSpeed));scope.update();},{passive:true});
+    this.dispose=function(){};
+  };
+})();
+
+// ─── Renderer ────────────────────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d0d1a);
+scene.fog = new THREE.Fog(0x0d0d1a, 18, 35);
+
+const camera = new THREE.PerspectiveCamera(40, window.innerWidth/window.innerHeight, 0.01, 60);
+camera.position.set(0, 1.2, 9);
+camera.lookAt(0, 0.5, 0);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.5, 0);
+controls.minDistance = 1.5;
+controls.maxDistance = 18;
+controls.update();
+
+const CAM_DEFAULT = { px:0, py:1.2, pz:9, tx:0, ty:0.5, tz:0 };
+
+// ─── Lighting ─────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+const sun = new THREE.DirectionalLight(0xfff0e0, 1.6);
+sun.position.set(3, 8, 6); sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-8; sun.shadow.camera.right=8;
+sun.shadow.camera.top=6; sun.shadow.camera.bottom=-4;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xb0c8ff, 0.4);
+fill.position.set(-5,3,-3); scene.add(fill);
+
+// ─── Materials ────────────────────────────────────────────────────────────────
+const M = {
+  alum:    new THREE.MeshStandardMaterial({ color:0x8ab4c8, roughness:0.18, metalness:0.75 }),
+  alumD:   new THREE.MeshStandardMaterial({ color:0x5a8aaa, roughness:0.22, metalness:0.7  }),
+  brick:   new THREE.MeshStandardMaterial({ color:0xc84a3a, roughness:0.88, metalness:0    }),
+  brickL:  new THREE.MeshStandardMaterial({ color:0xd4785a, roughness:0.85, metalness:0    }),
+  mortar:  new THREE.MeshStandardMaterial({ color:0xb0a898, roughness:0.9,  metalness:0    }),
+  timber:  new THREE.MeshStandardMaterial({ color:0xc8a26a, roughness:0.82, metalness:0    }),
+  ss:      new THREE.MeshStandardMaterial({ color:0xdde0e4, roughness:0.12, metalness:0.9  }),
+  epdm:    new THREE.MeshStandardMaterial({ color:0x151515, roughness:0.95, metalness:0    }),
+  plastic: new THREE.MeshStandardMaterial({ color:0x3c3c3c, roughness:0.7,  metalness:0    }),
+  conc:    new THREE.MeshStandardMaterial({ color:0x909090, roughness:0.8,  metalness:0.02 }),
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const hoverables = [];
+
+function mkBox(w,h,d,mat,x,y,z,userData){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+  m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true;
+  if(userData){ m.userData=userData; hoverables.push(m); }
+  return m;
+}
+function mkCyl(rt,rb,h,mat,x,y,z,rx,rz,userData){
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16), mat);
+  m.position.set(x,y,z);
+  if(rx) m.rotation.x=rx; if(rz) m.rotation.z=rz;
+  m.castShadow=true;
+  if(userData){ m.userData=userData; hoverables.push(m); }
+  return m;
+}
+function addTo(group,...meshes){ meshes.forEach(m=>group.add(m)); }
+
+// Brick pattern helper: creates a box with brick-like face
+function mkBrickWall(w,h,d,mat,x,y,z,userData){
+  const g = new THREE.Group(); g.position.set(x,y,z);
+  const main = mkBox(w,h,d,mat,0,0,0,userData);
+  g.add(main);
+  // Add mortar lines
+  const mh=0.075, ms=0.225;
+  for(let row=0; row*mh<h/2; row++){
+    const yy = -h/2 + row*mh + mh/2;
+    const mortar = mkBox(w+0.002,0.008,d+0.002,M.mortar,0,yy,-0.001);
+    g.add(mortar);
+  }
+  return g;
+}
+
+// ─── EXPLODE STATE ─────────────────────────────────────────────────────────────
+let exploded = false;
+let explodeT = 0; // 0=assembled, 1=exploded
+let explodeDir = 1;
+const explodeComponents = []; // { mesh/group, basePos, explodeOffset }
+
+function registerExplode(obj, exOffset){
+  const base = obj.position.clone();
+  explodeComponents.push({ obj, base, exOffset });
+}
+
+// ─── ================================================================ ─────────
+// ─── DETAIL 03: SC1 Privacy Screen Fixing (left side, cx=-3.0) ─────────────
+// ─── ================================================================ ─────────
+
+const SC1 = new THREE.Group();
+SC1.position.set(-3.0, 0, 0);
+scene.add(SC1);
+
+// All local coordinates. Y=0 = parapet top face.
+// Z=0 = parapet face / wall face. Z+ = outward (toward viewer).
+// X = horizontal along wall face.
+
+const sectionW = 0.6; // showing 600mm wide section
+
+// ── BRICK PARAPET ──────────────────────────────────────────────────────────
+const g_parapet = new THREE.Group();
+const parH = 0.35, parD = 0.3, parY = -0.175;
+// Brick courses
+const bCourseH = 0.075, bCourseW = sectionW+0.04;
+for(let c=0; c<5; c++){
+  const cy = -parH + c*bCourseH + bCourseH/2;
+  const bm = mkBox(bCourseW, bCourseH-0.008, parD, c%2===0?M.brick:M.brickL, 0,cy,0,
+    {name:'Brick Parapet', spec:'Clay brick masonry\n(by others)\n300mm nominal parapet'});
+  g_parapet.add(bm);
+  const mt = mkBox(bCourseW, 0.008, parD, M.mortar, 0, cy+bCourseH/2, 0);
+  g_parapet.add(mt);
+}
+g_parapet.position.set(0, parY, -parD/2);
+SC1.add(g_parapet);
+registerExplode(g_parapet, new THREE.Vector3(0,-0.6,0));
+
+// ── TIMBER FRAMING inside parapet ──────────────────────────────────────────
+const g_timber_p = mkBox(0.09, parH*0.9, 0.09, M.timber, 0, parY, -parD*0.6,
+  {name:'Timber Framing', spec:'90×45 timber stud\n(by others)\nInside brick parapet'});
+SC1.add(g_timber_p);
+registerExplode(g_timber_p, new THREE.Vector3(0,-0.8,-0.4));
+
+// ── SS M8 COACH SCREW (Bottom) — vertical, going DOWN into parapet ──────────
+const g_screw_b = mkCyl(0.004,0.004,0.14, M.ss, 0,-0.08,-0.03, Math.PI/2,0,
+  {name:'SS M8 Coach Screw', spec:'M8 × 150mm\nStainless steel\nGoes through spacer,\nEPDM into timber framing'});
+SC1.add(g_screw_b);
+// Screw head
+const g_screwH = mkCyl(0.009,0.009,0.012, M.ss, 0,-0.005,-0.03, Math.PI/2);
+SC1.add(g_screwH);
+registerExplode(g_screw_b, new THREE.Vector3(0,-0.4,0.3));
+registerExplode(g_screwH, new THREE.Vector3(0,-0.4,0.3));
+
+// ── SS SPACER TUBE (Bottom) ─────────────────────────────────────────────────
+const g_spacer_b = mkCyl(0.007,0.007,0.028, M.ss, 0,-0.005,-0.016, Math.PI/2,0,
+  {name:'SS Spacer Tube', spec:'Ø12mm × 25mm\nStainless steel\nProvides standoff between\nflat bar base and parapet'});
+// Inner bore
+const g_spacer_bore_b = mkCyl(0.004,0.004,0.030, M.epdm, 0,-0.005,-0.016, Math.PI/2);
+SC1.add(g_spacer_b); SC1.add(g_spacer_bore_b);
+registerExplode(g_spacer_b, new THREE.Vector3(0,-0.25,0.25));
+registerExplode(g_spacer_bore_b, new THREE.Vector3(0,-0.25,0.25));
+
+// ── EPDM SEPARATION (Bottom) ────────────────────────────────────────────────
+const g_epdm_b = mkBox(sectionW, 0.003, 0.15, M.epdm, 0,-0.003,0.075,
+  {name:'EPDM Separation', spec:'3mm thick EPDM rubber\nIsolation between\nAL flat bar and structure'});
+SC1.add(g_epdm_b);
+registerExplode(g_epdm_b, new THREE.Vector3(0,-0.15,0));
+
+// ── 150×4mm AL FLAT BAR — BOTTOM RAIL ─────────────────────────────────────
+// Runs horizontally (X), 150mm deep (Z), 4mm thick (Y)
+const g_flatBar_b = mkBox(sectionW, 0.004, 0.15, M.alum, 0, 0.002, 0.075,
+  {name:'150×4mm AL Flat Bar — Bottom Rail', spec:'150mm × 4mm aluminium flat bar\nHorizontal bottom rail\nFull width of screen: 1810mm\nSS M8 Coach Screw fixing to parapet'});
+SC1.add(g_flatBar_b);
+registerExplode(g_flatBar_b, new THREE.Vector3(0,-0.1,0));
+
+// ── SOLARIS 150-S LOUVRE BLADES — VERTICAL at 45° ─────────────────────────
+// Blades run VERTICALLY (Y axis)
+// 150mm wide (shown as Z depth at 45°)
+// At 45° around Y: so in plan looks like / or \
+// @140mm c/c in X direction → 4-5 blades in 600mm section
+// Actual blade cross-section: ~8mm thick × 150mm wide
+const nBlades = 4;
+const bladeSpacing = 0.14;
+const bladeH = 0.94; // height of louvre section shown (y=0.006 to y=0.95)
+const bladeYc = bladeH/2 + 0.006;
+const bladeGrp = new THREE.Group();
+
+for(let b=0; b<nBlades; b++){
+  const bx = -((nBlades-1)*bladeSpacing/2) + b*bladeSpacing;
+  const blade = new THREE.Mesh(
+    new THREE.BoxGeometry(0.008, bladeH, 0.15),
+    M.alumD
+  );
+  blade.position.set(bx, bladeYc, 0.075);
+  blade.rotation.y = Math.PI/4;
+  blade.castShadow = true;
+  blade.userData = { name:'Solaris 150-S Louvre Blade', spec:'150mm wide vertical blade\n45° angle position\n@140mm centres\nExtruded aluminium\nHeight: 1720mm (SC1)' };
+  hoverables.push(blade);
+  bladeGrp.add(blade);
+}
+SC1.add(bladeGrp);
+registerExplode(bladeGrp, new THREE.Vector3(0,0,0.35));
+
+// ── 150×4mm AL FLAT BAR — TOP RAIL ────────────────────────────────────────
+const g_flatBar_t = mkBox(sectionW, 0.004, 0.15, M.alum, 0, 0.95+0.002, 0.075,
+  {name:'150×4mm AL Flat Bar — Top Rail', spec:'150mm × 4mm aluminium flat bar\nHorizontal top rail\nFull width of screen: 1810mm\n14g SS TEK Screw fixing to soffit'});
+SC1.add(g_flatBar_t);
+registerExplode(g_flatBar_t, new THREE.Vector3(0,0.1,0));
+
+// ── EPDM SEPARATION (Top) ──────────────────────────────────────────────────
+const g_epdm_t = mkBox(sectionW, 0.003, 0.15, M.epdm, 0, 0.955, 0.075,
+  {name:'EPDM Separation', spec:'3mm thick EPDM rubber\nTop isolation layer\nBetween flat bar top\nand timber packer'});
+SC1.add(g_epdm_t);
+registerExplode(g_epdm_t, new THREE.Vector3(0,0.18,0));
+
+// ── TIMBER PACKER (Top) ────────────────────────────────────────────────────
+const g_packer = mkBox(0.07, 0.03, 0.05, M.timber, 0, 0.973, 0.025,
+  {name:'Timber Packer', spec:'70mm × 30mm × 50mm\n(by others)\nBetween EPDM and soffit framing\nAllows TEK screw fixing'});
+SC1.add(g_packer);
+registerExplode(g_packer, new THREE.Vector3(0,0.25,0.1));
+
+// ── 14g SS TEK SCREW (Top) ─────────────────────────────────────────────────
+const g_tek = mkCyl(0.002,0.001,0.065, M.ss, 0, 1.015, 0.025, 0,0,
+  {name:'14g SS TEK Screw', spec:'14 gauge self-drilling TEK screw\nFixes AL flat bar top\nto timber packer / framing above'});
+SC1.add(g_tek);
+registerExplode(g_tek, new THREE.Vector3(0,0.35,0.1));
+
+// ── TIMBER SOFFIT / FRAMING (Top) ─────────────────────────────────────────
+const g_soffit = mkBox(sectionW, 0.12, 0.28, M.timber, 0, 1.11, -0.01,
+  {name:'Timber Framing — Soffit', spec:'90×45 timber framing\n(by others)\nSoffit underside structure\nTEK screw goes up into this'});
+SC1.add(g_soffit);
+registerExplode(g_soffit, new THREE.Vector3(0,0.55,0));
+
+// ─── ================================================================ ─────────
+// ─── DETAIL 04: LP's RHS Frame to Brick Veneer (right side, cx=+3.0) ────────
+// ─── ================================================================ ─────────
+
+const LP = new THREE.Group();
+LP.position.set(3.0, 0, 0);
+scene.add(LP);
+
+// Showing a VERTICAL SECTION through the wall connection
+// Y = height, X = along wall, Z = depth (Z=0=wall face, Z+ = outward)
+
+const lpH = 1.2; // height of section shown
+
+// ── TIMBER FRAMING (inside wall) ─────────────────────────────────────────
+const g_lp_timber = mkBox(sectionW, lpH, 0.09, M.timber, 0, 0, -0.195,
+  {name:'Timber Framing', spec:'90×45 stud framing\n(by others)\nBehind brick veneer\nReceives plastic plug anchor'});
+LP.add(g_lp_timber);
+registerExplode(g_lp_timber, new THREE.Vector3(0,0,-0.5));
+
+// ── BRICK VENEER WALL ─────────────────────────────────────────────────────
+const lpBrickGrp = new THREE.Group();
+const bvH = 0.075, bvD = 0.11;
+for(let r=0; r<16; r++){
+  const ry = -lpH/2 + r*bvH + bvH/2;
+  const offset = r%2===0 ? 0 : 0.06;
+  for(let col=0; col<3; col++){
+    const bx = -0.225 + col*0.225 + offset;
+    const bk = mkBox(0.215, bvH-0.008, bvD, r%2===0?M.brick:M.brickL, bx,ry,-0.055,
+      {name:'Brick Veneer', spec:'110mm clay brick veneer\n(by others)\n230×110×75 standard brick\nMortar jointed'});
+    lpBrickGrp.add(bk);
+  }
+  // Mortar bed
+  const mtl = mkBox(sectionW,0.008,bvD,M.mortar,0,ry+bvH/2,-0.055);
+  lpBrickGrp.add(mtl);
+}
+LP.add(lpBrickGrp);
+registerExplode(lpBrickGrp, new THREE.Vector3(0,0,-0.28));
+
+// ── PLASTIC PLUG (in brick) ───────────────────────────────────────────────
+const g_plug = mkCyl(0.005,0.005,0.06, M.plastic, 0,0.1,-0.065, Math.PI/2,0,
+  {name:'Plastic Plug', spec:'Ø10mm × 60mm nylon anchor\nInserted into brick veneer\nReceives SS M8 Coach Screw'});
+LP.add(g_plug);
+registerExplode(g_plug, new THREE.Vector3(0,0.2,-0.15));
+
+// ── EPDM TAPE ─────────────────────────────────────────────────────────────
+const g_lp_epdm = mkBox(sectionW, lpH, 0.003, M.epdm, 0, 0, 0.0015,
+  {name:'EPDM Tape', spec:'3mm EPDM tape\nWaterproof isolation\nBetween spacer tube\nand brick veneer face'});
+LP.add(g_lp_epdm);
+registerExplode(g_lp_epdm, new THREE.Vector3(0,0,0.1));
+
+// ── SS SPACER TUBE ────────────────────────────────────────────────────────
+const g_lp_spacer = mkCyl(0.007,0.007,0.03, M.ss, 0,0.1,0.018, Math.PI/2,0,
+  {name:'SS Spacer Tube', spec:'Ø12mm × 30mm\nStainless steel\nMaintains gap between\nRHS frame and brick face'});
+const g_lp_spacer2 = mkCyl(0.007,0.007,0.03, M.ss, 0,-0.25,0.018, Math.PI/2);
+LP.add(g_lp_spacer); LP.add(g_lp_spacer2);
+registerExplode(g_lp_spacer, new THREE.Vector3(0,0.15,0.22));
+registerExplode(g_lp_spacer2, new THREE.Vector3(0,-0.15,0.22));
+
+// ── SS M8 COACH SCREW (Counterbore) ──────────────────────────────────────
+const g_lp_screw = mkCyl(0.004,0.004,0.18, M.ss, 0,0.1,0,  Math.PI/2,0,
+  {name:'SS M8 Coach Screw (Counterbore)', spec:'M8 × 180mm\nStainless steel\nCounterbored through RHS flange\nThrough spacer + EPDM\nInto plastic plug in brick'});
+const g_lp_screw2 = mkCyl(0.004,0.004,0.18, M.ss, 0,-0.25,0, Math.PI/2);
+LP.add(g_lp_screw); LP.add(g_lp_screw2);
+// Screw heads (counterbored)
+const g_lp_screwH = mkCyl(0.008,0.008,0.01, M.ss, 0,0.1,0.054, Math.PI/2);
+const g_lp_screwH2 = mkCyl(0.008,0.008,0.01, M.ss, 0,-0.25,0.054, Math.PI/2);
+LP.add(g_lp_screwH); LP.add(g_lp_screwH2);
+registerExplode(g_lp_screw, new THREE.Vector3(0,0.2,0.35));
+registerExplode(g_lp_screw2, new THREE.Vector3(0,-0.2,0.35));
+registerExplode(g_lp_screwH, new THREE.Vector3(0,0.2,0.35));
+registerExplode(g_lp_screwH2, new THREE.Vector3(0,-0.2,0.35));
+
+// ── 100×50×3 AL RHS FRAME ────────────────────────────────────────────────
+// The LP panel RHS frame: 100mm (Y) × 50mm (Z) cross-section
+// 4 walls, 3mm thick each
+const RHS_H=lpH, RHS_W=0.1, RHS_D=0.05, RHS_T=0.003;
+const rhs_udata = {name:'100×50×3 AL RHS Frame', spec:'100 × 50 × 3mm aluminium RHS\nOuter frame of LP louvre panel\n100mm face vertical\n50mm depth horizontal\nSS M8 Coach Screw counterbore fix'};
+// Back wall (closest to wall, z=0.033 to 0.036)
+const rhs_back = mkBox(sectionW, RHS_H, RHS_T, M.alum, 0,0,0.033, rhs_udata);
+// Front wall (z=0.080 to 0.083)
+const rhs_front = mkBox(sectionW, RHS_H, RHS_T, M.alum, 0,0,0.080, rhs_udata);
+// Top flange (y= RHS_H/2-RHS_T/2 to RHS_H/2)
+const rhs_top = mkBox(sectionW, RHS_T, RHS_D-RHS_T*2, M.alum, 0,RHS_H/2-RHS_T/2,0.057, rhs_udata);
+// Bottom flange
+const rhs_bot = mkBox(sectionW, RHS_T, RHS_D-RHS_T*2, M.alum, 0,-RHS_H/2+RHS_T/2,0.057, rhs_udata);
+LP.add(rhs_back); LP.add(rhs_front); LP.add(rhs_top); LP.add(rhs_bot);
+[rhs_back,rhs_front,rhs_top,rhs_bot].forEach(m => registerExplode(m, new THREE.Vector3(0,0,0.5)));
+
+// ── SOLARIS 100-S LOUVRE INFILL ──────────────────────────────────────────
+const louvreInfill_H = lpH - 0.012;
+const nInfill = Math.floor(louvreInfill_H / 0.05);
+for(let li=0; li<nInfill; li++){
+  const ly = -louvreInfill_H/2 + li*0.05 + 0.025;
+  const inf = mkBox(sectionW-0.01, 0.006, 0.1-RHS_T*2, M.alumD,
+    0, ly, 0.0570,
+    {name:'Solaris 100-S Louvre', spec:'100mm wide aluminium louvre blade\nFixed position\nInfill within 100×50×3 RHS frame\nLP1A/B/C panels'});
+  LP.add(inf);
+  registerExplode(inf, new THREE.Vector3(0,0,0.7));
+}
+
+// ─── SEPARATING DIVIDER ─────────────────────────────────────────────────────
+{
+  const div = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.004, 3.5),
+    new THREE.MeshStandardMaterial({ color:0x334466, roughness:1, side:THREE.DoubleSide })
+  );
+  div.position.set(0, 0.5, -0.3);
+  div.rotation.y = Math.PI/2;
+  scene.add(div);
+}
+
+// ─── DIMENSION LINES ────────────────────────────────────────────────────────
+function addDimLine(ax,ay,az, bx,by,bz, color=0x7eb5d6){
+  const pts = [new THREE.Vector3(ax,ay,az), new THREE.Vector3(bx,by,bz)];
+  const geom = new THREE.BufferGeometry().setFromPoints(pts);
+  const line = new THREE.Line(geom, new THREE.LineBasicMaterial({color,linewidth:1.5}));
+  scene.add(line);
+}
+// SC1: overall height dimension line
+addDimLine(-3.6-0.04,0,0, -3.6-0.04,0.95,0);
+addDimLine(-3.6-0.08,0,0, -3.6,0,0);
+addDimLine(-3.6-0.08,0.95,0, -3.6,0.95,0);
+// SC1: louvre spacing
+for(let b=0; b<3; b++){
+  const y1 = 0.006 + b*0.14;
+  addDimLine(-3.6+0.22,y1,-0.01, -3.6+0.22,y1+0.14,-0.01, 0x5588aa);
+  addDimLine(-3.6+0.18,y1,-0.01, -3.6+0.26,y1,-0.01, 0x5588aa);
+  addDimLine(-3.6+0.18,y1+0.14,-0.01, -3.6+0.26,y1+0.14,-0.01, 0x5588aa);
+}
+// LP: depth dimension
+addDimLine(3.6+0.04,-0.7,0.003, 3.6+0.04,-0.7,0.083);
+addDimLine(3.6,      -0.7-0.04,0.003, 3.6,      -0.7+0.04,0.003);
+addDimLine(3.6,      -0.7-0.04,0.083, 3.6,      -0.7+0.04,0.083);
+
+// ─── ANNOTATION LABELS ──────────────────────────────────────────────────────
+// Create HTML annotation divs
+const annDivs = {};
+ANN_DEFS.forEach(def => {
+  const div = document.createElement('div');
+  div.className = 'ann' + (def.side==='left'?' right':'');
+  div.id = def.id;
+  const dot = document.createElement('div');
+  dot.className = 'ann-dot';
+  dot.style.background = def.color;
+  const line = document.createElement('div');
+  line.className = 'ann-line';
+  line.style.cssText = `width:28px;background:${def.color};opacity:0.5;`;
+  const text = document.createElement('div');
+  text.className = 'ann-text';
+  text.innerHTML = `${def.label}<span class="dim">${def.dim}</span>`;
+  div.appendChild(dot); div.appendChild(line); div.appendChild(text);
+  document.body.appendChild(div);
+  annDivs[def.id] = div;
+});
+
+// ─── RAYCASTER / HOVER ──────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const tooltip = document.getElementById('tooltip');
+const ttName = document.getElementById('tt-name');
+const ttSpec = document.getElementById('tt-spec');
+
+renderer.domElement.addEventListener('mousemove', e => {
+  mouse.x = (e.clientX/window.innerWidth)*2-1;
+  mouse.y = -(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(hoverables, false);
+  if(hits.length && hits[0].object.userData.name){
+    const d = hits[0].object.userData;
+    ttName.textContent = d.name;
+    ttSpec.innerHTML = d.spec.replace(/\n/g,'<br>');
+    tooltip.style.display='block';
+    tooltip.style.left=(e.clientX+14)+'px';
+    tooltip.style.top=(e.clientY-10)+'px';
+    renderer.domElement.style.cursor='pointer';
+  } else {
+    tooltip.style.display='none';
+    renderer.domElement.style.cursor='default';
+  }
+});
+
+// ─── EXPLODE / ASSEMBLE ─────────────────────────────────────────────────────
+let animating = false;
+const ANIM_SPEED = 0.03;
+
+function toggleExplode(){
+  explodeDir = exploded ? -1 : 1;
+  exploded = !exploded;
+  animating = true;
+  const btn = document.getElementById('btn-explode');
+  btn.textContent = exploded ? '⊖ Assemble' : '⊕ Explode View';
+  btn.classList.toggle('active', exploded);
+}
+
+function updateExplode(){
+  explodeT = Math.max(0, Math.min(1, explodeT + explodeDir*ANIM_SPEED));
+  const t = explodeT < 0.5 ? 4*explodeT*explodeT*explodeT : 1-Math.pow(-2*explodeT+2,3)/2;
+  explodeComponents.forEach(({obj, base, exOffset}) => {
+    obj.position.set(
+      base.x + exOffset.x * t,
+      base.y + exOffset.y * t,
+      base.z + exOffset.z * t
+    );
+  });
+  if((explodeDir>0 && explodeT>=1)||(explodeDir<0 && explodeT<=0)) animating=false;
+}
+
+function resetCamera(){
+  camera.position.set(CAM_DEFAULT.px, CAM_DEFAULT.py, CAM_DEFAULT.pz);
+  controls.target.set(CAM_DEFAULT.tx, CAM_DEFAULT.ty, CAM_DEFAULT.tz);
+  controls.update();
+}
+
+// ─── ANNOTATION POSITIONING ─────────────────────────────────────────────────
+const tmpVec = new THREE.Vector3();
+function updateAnnotations(){
+  ANN_DEFS.forEach(def => {
+    tmpVec.set(def.worldX, def.worldY, def.worldZ);
+    tmpVec.project(camera);
+    const x = (tmpVec.x*.5+.5)*window.innerWidth;
+    const y = (tmpVec.y*-.5+.5)*window.innerHeight;
+    const div = annDivs[def.id];
+    if(tmpVec.z<1){
+      div.style.display='flex';
+      div.style.left = (def.side==='right' ? x : x-220) + 'px';
+      div.style.top = y + 'px';
+    } else { div.style.display='none'; }
+  });
+}
+
+// ─── DIMENSION TEXT SPRITES ─────────────────────────────────────────────────
+function makeTextSprite(txt, x, y, z, size=0.18){
+  const c = document.createElement('canvas'); c.width=300; c.height=60;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle='rgba(0,0,0,0)';
+  ctx.fillRect(0,0,300,60);
+  ctx.fillStyle='#7eb5d6';
+  ctx.font='bold 26px monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(txt, 150, 30);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  sp.scale.set(size*5,size,1); sp.position.set(x,y,z);
+  scene.add(sp);
+}
+// SC1 dimension labels
+makeTextSprite('950mm', -3.85, 0.475, 0.0);
+makeTextSprite('@140', -2.65, 0.25, -0.01, 0.12);
+makeTextSprite('@140', -2.65, 0.39, -0.01, 0.12);
+makeTextSprite('4mm', -3.48, 0.002, 0.15, 0.12);
+makeTextSprite('150mm', -2.15, 0.002, 0.075, 0.12);
+// LP dimension labels
+makeTextSprite('50mm', 3.75, -0.7, 0.043, 0.13);
+makeTextSprite('100mm', 3.6, 0.6+0.5, 0.057, 0.13);
+makeTextSprite('3mm', 3.55, -0.7-0.2, 0.033, 0.12);
+
+// ─── GRID / GROUND ───────────────────────────────────────────────────────────
+{
+  const grid = new THREE.GridHelper(20, 40, 0x1a2a3a, 0x141e28);
+  grid.position.set(0,-0.58,0);
+  scene.add(grid);
+}
+
+// ─── RENDER LOOP ─────────────────────────────────────────────────────────────
+function animate(){
+  requestAnimationFrame(animate);
+  if(animating) updateExplode();
+  controls.update();
+  updateAnnotations();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
